@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TikTok Content Studio — Storyboard & Caption</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f14;
+  --panel:#1a1a24;
+  --panel2:#22222e;
+  --border:#32323f;
+  --text:#f0f0f5;
+  --muted:#9a9aad;
+  --cyan:#25f4ee;
+  --pink:#fe2c55;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Prompt',sans-serif;min-height:100vh}
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:16px 24px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:rgba(15,15,20,.92);backdrop-filter:blur(8px);z-index:50;
+}
+.logo{font-size:20px;font-weight:700}
+.logo .tik{color:var(--cyan)} .logo .tok{color:var(--pink)}
+.logo small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select,input,textarea{font-family:inherit;font-size:14px;color:var(--text)}
+.btn{
+  background:var(--panel2);border:1px solid var(--border);border-radius:10px;
+  padding:8px 14px;cursor:pointer;transition:.15s;
+}
+.btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn.primary{background:var(--pink);border-color:var(--pink);font-weight:600}
+.btn.primary:hover{filter:brightness(1.15);color:#fff}
+.btn.small{padding:4px 10px;font-size:12px;border-radius:8px}
+.btn.danger:hover{border-color:var(--pink);color:var(--pink)}
+select,input[type=text],input[type=number],textarea{
+  background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;outline:none;
+}
+select:focus,input:focus,textarea:focus{border-color:var(--cyan)}
+textarea{resize:vertical;width:100%}
+main{max-width:1200px;margin:0 auto;padding:24px}
+
+/* tabs */
+.tabs{display:flex;gap:8px;margin-bottom:20px}
+.tab{
+  padding:10px 22px;border-radius:999px;border:1px solid var(--border);
+  background:var(--panel);cursor:pointer;font-weight:500;font-size:15px;
+}
+.tab.active{background:linear-gradient(90deg,rgba(37,244,238,.15),rgba(254,44,85,.15));border-color:var(--cyan);color:#fff}
+.page{display:none}
+.page.active{display:block}
+
+/* project bar */
+.projectbar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 16px;margin-bottom:20px;
+}
+.projectbar label{font-size:13px;color:var(--muted)}
+#projectName{min-width:220px}
+.posttype{display:flex;gap:6px}
+.posttype .pt{
+  padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:var(--panel2);
+  cursor:pointer;font-size:13px;
+}
+.pt.active{border-color:var(--pink);background:rgba(254,44,85,.15);color:#fff}
+
+/* storyboard */
+.sb-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.duration-badge{
+  background:var(--panel2);border:1px solid var(--border);border-radius:999px;
+  padding:6px 16px;font-size:14px;
+}
+.duration-badge b{color:var(--cyan)}
+.duration-badge.over b{color:var(--pink)}
+.scene{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;margin-bottom:14px;display:grid;grid-template-columns:52px 1fr;gap:14px;
+}
+.scene-num{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.scene-num .num{
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--cyan),var(--pink));color:#000;font-weight:700;font-size:15px;
+}
+.scene-num button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px}
+.scene-num button:hover{color:var(--cyan)}
+.scene-body{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.scene-body .full{grid-column:1/-1}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.field textarea{min-height:44px;font-size:14px}
+.scene-foot{display:flex;justify-content:space-between;align-items:center;grid-column:1/-1;gap:10px;flex-wrap:wrap}
+.scene-foot .left{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.scene-foot input[type=number]{width:70px;padding:5px 8px}
+.scenetype{padding:5px 10px;font-size:13px}
+.empty{
+  border:2px dashed var(--border);border-radius:var(--radius);padding:40px;text-align:center;color:var(--muted);
+  margin-bottom:14px;
+}
+
+/* caption */
+.cap-grid{display:grid;grid-template-columns:1fr 380px;gap:20px}
+@media(max-width:900px){.cap-grid{grid-template-columns:1fr}.scene-body{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.card h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan)}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chip{
+  padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--panel2);
+  cursor:pointer;font-size:12.5px;transition:.15s;
+}
+.chip:hover{border-color:var(--cyan)}
+.chip.on{border-color:var(--pink);background:rgba(254,44,85,.18);color:#fff}
+.hint{font-size:12px;color:var(--muted);margin-bottom:8px}
+.preview{
+  background:#000;border:1px solid var(--border);border-radius:var(--radius);padding:18px;
+  white-space:pre-wrap;font-size:14.5px;line-height:1.7;min-height:180px;
+}
+.preview .tag{color:var(--cyan)}
+.charcount{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
+.charcount.over{color:var(--pink);font-weight:600}
+.sticky{position:sticky;top:90px}
+.field + .field{margin-top:10px}
+
+/* toast */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--cyan);color:#000;font-weight:600;padding:10px 24px;border-radius:999px;
+  transition:.3s;z-index:100;opacity:0;
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="tik">Tik</span><span class="tok">Tok</span> Content Studio
+    <small>วางแผน Storyboard + เขียนแคปชั่น สำหรับครีเอเตอร์</small>
+  </div>
+  <div class="toolbar">
+    <select id="projectSelect" title="เลือกโปรเจกต์"></select>
+    <button class="btn" id="btnNewProject">+ โปรเจกต์ใหม่</button>
+    <button class="btn danger" id="btnDeleteProject">ลบ</button>
+    <button class="btn primary" id="btnExport">⬇ Export</button>
+  </div>
+</header>
+
+<main>
+  <div class="projectbar">
+    <label>ชื่อโปรเจกต์</label>
+    <input type="text" id="projectName" placeholder="เช่น คลิปรีวิวคาเฟ่เปิดใหม่">
+    <label>ประเภทโพสต์</label>
+    <div class="posttype" id="postType">
+      <div class="pt" data-v="video">🎬 วีดีโอ</div>
+      <div class="pt" data-v="photo">🖼️ รูปภาพ/สไลด์</div>
+    </div>
+    <label>หมวดคอนเทนต์</label>
+    <select id="niche">
+      <option value="food">🍜 อาหาร/คาเฟ่</option>
+      <option value="beauty">💄 ความงาม/แฟชั่น</option>
+      <option value="travel">✈️ ท่องเที่ยว</option>
+      <option value="edu">📚 ความรู้/How-to</option>
+      <option value="funny">😂 ตลก/ไลฟ์สไตล์</option>
+      <option value="shop">🛍️ ขายของ/รีวิวสินค้า</option>
+      <option value="fitness">💪 สุขภาพ/ออกกำลังกาย</option>
+      <option value="tech">📱 เทคโนโลยี/แกดเจ็ต</option>
+    </select>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-page="storyboard">🎬 Storyboard</div>
+    <div class="tab" data-page="caption">✍️ แคปชั่น</div>
+  </div>
+
+  <!-- ================= STORYBOARD ================= -->
+  <section class="page active" id="page-storyboard">
+    <div class="sb-head">
+      <div class="duration-badge" id="durationBadge">รวมเวลา <b>0</b> วินาที</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="btnTemplate">✨ ใช้โครงสร้างแนะนำ</button>
+        <button class="btn primary" id="btnAddScene">+ เพิ่มฉาก</button>
+      </div>
+    </div>
+    <div id="sceneList"></div>
+    <div class="empty" id="sceneEmpty">ยังไม่มีฉากเลย — กด <b>+ เพิ่มฉาก</b> หรือ <b>✨ ใช้โครงสร้างแนะนำ</b> เพื่อเริ่มต้น<br>
+      <small>โครงสร้างแนะนำ = Hook → เนื้อหา → จุดพีค → CTA ตามสูตรคลิปไวรัล</small>
+    </div>
+  </section>
+
+  <!-- ================= CAPTION ================= -->
+  <section class="page" id="page-caption">
+    <div class="cap-grid">
+      <div>
+        <div class="card">
+          <h3><span class="dot"></span>1. Hook — ประโยคเปิดดึงคนหยุดดู</h3>
+          <div class="hint">เลือกแนว hook แล้วกดสุ่มได้เรื่อย ๆ หรือพิมพ์เองด้านล่าง</div>
+          <div class="chiprow" id="hookStyles"></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button class="btn small" id="btnRandomHook">🎲 สุ่ม Hook</button>
+          </div>
+          <textarea id="hookText" rows="2" placeholder="ประโยคเปิดของแคปชั่น..."></textarea>
+        </div>
+
+        <div class="card">
+          <h3><span class="dot"></span>2. เนื้อหา — เล่ารายละเอียด</h3>
+          <textarea id="bodyText" rows="4" placeholder="เล่าเนื้อหา จุดเด่น ราคา พิกัด ฯลฯ&#10;เคล็ดลับ: เขียนสั้น เว้นบรรทัด อ่านง่ายบนมือถือ"></textarea>
+        </div>
+
+        <div class="card">
+          <h3><span class="dot"></span>3. CTA — ชวนให้คนมีส่วนร่วม</h3>
+          <div class="chiprow" id="ctaChips"></div>
+          <textarea id="ctaText" rows="2" placeholder="เช่น ใครเคยไปแล้วบ้าง คอมเมนต์บอกหน่อย 👇"></textarea>
+        </div>
+
+        <div class="card">
+          <h3><span class="dot"></span>4. แฮชแท็ก</h3>
+          <div class="hint">แนะนำ 3–6 แท็ก: ผสมแท็กกว้าง (fyp) + แท็กหมวด + แท็กเฉพาะคลิป</div>
+          <div class="chiprow" id="hashtagChips"></div>
+          <input type="text" id="customTag" placeholder="พิมพ์แท็กเองแล้วกด Enter (ไม่ต้องใส่ #)" style="width:100%">
+        </div>
+      </div>
+
+      <div>
+        <div class="sticky">
+          <div class="card">
+            <h3><span class="dot" style="background:var(--pink)"></span>ตัวอย่างแคปชั่น</h3>
+            <div class="preview" id="capPreview"></div>
+            <div class="charcount" id="charCount">0 ตัวอักษร</div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn primary" style="flex:1" id="btnCopy">📋 คัดลอกแคปชั่น</button>
+            </div>
+            <div class="hint" style="margin-top:10px">💡 TikTok จำกัดแคปชั่น 4,000 ตัวอักษร แต่ 100–300 ตัวอักษรแรกสำคัญที่สุด เพราะโดนตัดด้วย "ดูเพิ่มเติม"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast">คัดลอกแล้ว!</div>
+<footer>ข้อมูลถูกบันทึกอัตโนมัติในเบราว์เซอร์ของคุณ (localStorage) — TikTok Content Studio</footer>
+
+<script>
+/* ================= DATA ================= */
+const HOOKS = {
+  question: {label:"❓ คำถามชวนคิด", items:[
+    "รู้ไหมว่าทำไม{topic}ถึงเป็นแบบนี้?",
+    "ถ้าให้เลือกได้แค่อันเดียว จะเลือกอันไหน?",
+    "เคยสงสัยไหมว่า{topic}จริง ๆ แล้วเป็นยังไง?",
+    "ใครยังไม่รู้บ้างว่า{topic}?",
+  ]},
+  shock: {label:"😱 เซอร์ไพรส์/ช็อก", items:[
+    "ไม่อยากเชื่อว่าจะเจอแบบนี้...",
+    "นี่คือสิ่งที่ไม่มีใครบอกคุณเกี่ยวกับ{topic}",
+    "ดูจบแล้วคุณจะเปลี่ยนความคิดทันที",
+    "เสียดายมากที่เพิ่งรู้เรื่องนี้!",
+  ]},
+  list: {label:"🔢 ลิสต์/อันดับ", items:[
+    "5 อย่างที่ต้องรู้ก่อน{topic}",
+    "3 ที่เด็ดที่คนท้องถิ่นเท่านั้นที่รู้",
+    "รวม{topic}ที่ดีที่สุด ประหยัดเวลาหาเอง",
+    "อันดับ 1 คือตัวจบจริง ๆ",
+  ]},
+  secret: {label:"🤫 เคล็ดลับ/ความลับ", items:[
+    "เคล็ดลับที่ร้านไม่เคยบอก...",
+    "วิธีลัดที่ใช้มา 3 ปี ไม่เคยพลาด",
+    "สูตรลับที่ทำตามได้เลยวันนี้",
+    "บอกต่อเฉพาะคนที่เลื่อนมาเจอ",
+  ]},
+  relatable: {label:"🥹 อินไปด้วยกัน", items:[
+    "ใครเป็นเหมือนกันบ้าง ยกมือขึ้น 🙋",
+    "POV: วันที่ทุกอย่างไม่เป็นใจ แต่เจอสิ่งนี้",
+    "สายนี้ต้องเซฟไว้เลย",
+    "ถ้าคุณกำลังหา{topic} คลิปนี้คือคำตอบ",
+  ]},
+};
+const CTAS = [
+  "คอมเมนต์บอกหน่อยว่าคิดยังไง 👇",
+  "เซฟไว้ก่อน เดี๋ยวหาไม่เจอ 🔖",
+  "แท็กเพื่อนที่ต้องเห็นสิ่งนี้ 👯",
+  "ฝากกดใจ + ติดตามด้วยนะ 🥰",
+  "อยากดู EP ต่อไปไหม บอกในคอมเมนต์เลย",
+  "ใครเคยลองแล้ว รีวิวหน่อย!",
+  "แชร์ให้คนที่ควรได้เห็น 📤",
+];
+const HASHTAGS = {
+  food:["อาหาร","คาเฟ่","ของกิน","กินอะไรดี","รีวิวร้านอาหาร","คาเฟ่น่านั่ง","สายกิน","อร่อยบอกต่อ"],
+  beauty:["ความงาม","แต่งหน้า","สกินแคร์","แฟชั่น","ootd","บิวตี้","เมคอัพ","ผิวสวย"],
+  travel:["เที่ยว","ท่องเที่ยว","เที่ยวไทย","ทะเล","ภูเขา","ที่เที่ยว","เที่ยวไหนดี","travel"],
+  edu:["ความรู้","เรียน","howto","เคล็ดลับ","พัฒนาตัวเอง","ภาษาอังกฤษ","สาระ","รู้ไว้ใช่ว่า"],
+  funny:["ตลก","ฮา","ขำ","มีมส์","ไลฟ์สไตล์","คลายเครียด","funny","comedy"],
+  shop:["รีวิวสินค้า","ของมันต้องมี","ป้ายยา","tiktokshop","ช้อปปิ้ง","ของดีบอกต่อ","สินค้าไวรัล","haul"],
+  fitness:["ออกกำลังกาย","ฟิตเนส","ลดน้ำหนัก","สุขภาพ","gym","workout","คลีน","หุ่นดี"],
+  tech:["เทคโนโลยี","แกดเจ็ต","ไอที","มือถือ","แอพดีบอกต่อ","ai","รีวิวมือถือ","tech"],
+};
+const BROAD_TAGS = ["fyp","ฟีดเถอะ","tiktokไทย","เทรนด์วันนี้"];
+
+const VIDEO_TEMPLATE = [
+  {type:"Hook",     visual:"ภาพ/ฉากที่สะดุดตาที่สุดของคลิป", dialog:"ประโยคเปิดดึงความสนใจใน 3 วินาทีแรก", overlay:"ข้อความตัวใหญ่สรุปว่าคลิปนี้เกี่ยวกับอะไร", dur:3},
+  {type:"เนื้อหา",  visual:"เล่ารายละเอียดหลัก จุดที่ 1", dialog:"", overlay:"", dur:8},
+  {type:"เนื้อหา",  visual:"เล่ารายละเอียดหลัก จุดที่ 2", dialog:"", overlay:"", dur:8},
+  {type:"จุดพีค",   visual:"ช็อตเด็ด/ผลลัพธ์/เฉลย", dialog:"", overlay:"", dur:6},
+  {type:"CTA",      visual:"หน้ากล้อง/สรุปจบ", dialog:"ชวนกดติดตาม คอมเมนต์ หรือแชร์", overlay:"Follow ไว้ ไม่พลาดคลิปหน้า", dur:3},
+];
+const PHOTO_TEMPLATE = [
+  {type:"Hook",    visual:"รูปที่ 1 — ภาพปก ต้องหยุดนิ้วให้ได้ + ข้อความตัวใหญ่", dialog:"", overlay:"หัวข้อหลักของโพสต์", dur:0},
+  {type:"เนื้อหา", visual:"รูปที่ 2 — เนื้อหาจุดที่ 1", dialog:"", overlay:"", dur:0},
+  {type:"เนื้อหา", visual:"รูปที่ 3 — เนื้อหาจุดที่ 2", dialog:"", overlay:"", dur:0},
+  {type:"เนื้อหา", visual:"รูปที่ 4 — เนื้อหาจุดที่ 3", dialog:"", overlay:"", dur:0},
+  {type:"CTA",     visual:"รูปสุดท้าย — สรุป + ชวนติดตาม/เซฟโพสต์", dialog:"", overlay:"เซฟไว้ดูทีหลังได้เลย 🔖", dur:0},
+];
+
+/* ================= STATE ================= */
+const LS_KEY = "ttstudio_projects_v1";
+let store = JSON.parse(localStorage.getItem(LS_KEY) || "null") || {projects:{}, current:null};
+let saveTimer;
+
+function blankProject(){
+  return {
+    name:"โปรเจกต์ใหม่", postType:"video", niche:"food",
+    scenes:[], hookStyle:"question", hook:"", body:"", cta:"", tags:["fyp"],
+    created:Date.now(),
+  };
+}
+function currentProject(){ return store.projects[store.current]; }
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>localStorage.setItem(LS_KEY, JSON.stringify(store)), 250);
+}
+function uid(){ return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+if(!store.current || !store.projects[store.current]){
+  const id = uid();
+  store.projects[id] = blankProject();
+  store.current = id;
+  save();
+}
+
+/* ================= PROJECT BAR ================= */
+const $ = s=>document.querySelector(s);
+const projectSelect = $("#projectSelect");
+
+function renderProjectSelect(){
+  projectSelect.innerHTML = "";
+  Object.entries(store.projects)
+    .sort((a,b)=>b[1].created-a[1].created)
+    .forEach(([id,p])=>{
+      const o = document.createElement("option");
+      o.value = id; o.textContent = p.name || "(ไม่มีชื่อ)";
+      if(id===store.current) o.selected = true;
+      projectSelect.appendChild(o);
+    });
+}
+projectSelect.onchange = ()=>{ store.current = projectSelect.value; save(); loadProjectUI(); };
+
+$("#btnNewProject").onclick = ()=>{
+  const id = uid();
+  store.projects[id] = blankProject();
+  store.current = id; save();
+  renderProjectSelect(); loadProjectUI();
+};
+$("#btnDeleteProject").onclick = ()=>{
+  const p = currentProject();
+  if(!confirm(`ลบโปรเจกต์ "${p.name}" ?`)) return;
+  delete store.projects[store.current];
+  if(Object.keys(store.projects).length===0){
+    const id = uid(); store.projects[id]=blankProject(); store.current=id;
+  } else store.current = Object.keys(store.projects)[0];
+  save(); renderProjectSelect(); loadProjectUI();
+};
+
+$("#projectName").oninput = e=>{ currentProject().name = e.target.value; save(); renderProjectSelect(); };
+$("#niche").onchange = e=>{ currentProject().niche = e.target.value; save(); renderHashtags(); renderPreview(); };
+
+document.querySelectorAll("#postType .pt").forEach(el=>{
+  el.onclick = ()=>{
+    currentProject().postType = el.dataset.v; save();
+    renderPostType(); renderScenes();
+  };
+});
+function renderPostType(){
+  const v = currentProject().postType;
+  document.querySelectorAll("#postType .pt").forEach(el=>el.classList.toggle("active", el.dataset.v===v));
+}
+
+/* ================= TABS ================= */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    $("#page-"+t.dataset.page).classList.add("active");
+  };
+});
+
+/* ================= STORYBOARD ================= */
+const sceneList = $("#sceneList");
+const SCENE_TYPES = ["Hook","เนื้อหา","จุดพีค","CTA","B-roll","อื่น ๆ"];
+
+function renderScenes(){
+  const p = currentProject();
+  const isVideo = p.postType==="video";
+  sceneList.innerHTML = "";
+  $("#sceneEmpty").style.display = p.scenes.length ? "none":"block";
+
+  p.scenes.forEach((sc,i)=>{
+    const div = document.createElement("div");
+    div.className = "scene";
+    div.innerHTML = `
+      <div class="scene-num">
+        <div class="num">${i+1}</div>
+        <button title="เลื่อนขึ้น" data-a="up">▲</button>
+        <button title="เลื่อนลง" data-a="down">▼</button>
+        <button title="ลบฉาก" data-a="del" style="color:#c66">✕</button>
+      </div>
+      <div class="scene-body">
+        <div class="field full">
+          <label>${isVideo?"ภาพที่เห็น (ถ่ายอะไร มุมไหน)":"รูปภาพ (รูปอะไร จัดวางยังไง)"}</label>
+          <textarea data-f="visual">${sc.visual||""}</textarea>
+        </div>
+        <div class="field">
+          <label>${isVideo?"บทพูด / เสียงบรรยาย":"แคปชั่นบนรูป"}</label>
+          <textarea data-f="dialog">${sc.dialog||""}</textarea>
+        </div>
+        <div class="field">
+          <label>ข้อความบนจอ (Text overlay)</label>
+          <textarea data-f="overlay">${sc.overlay||""}</textarea>
+        </div>
+        <div class="scene-foot">
+          <div class="left">
+            ประเภท:
+            <select class="scenetype" data-f="type">
+              ${SCENE_TYPES.map(t=>`<option ${sc.type===t?"selected":""}>${t}</option>`).join("")}
+            </select>
+            ${isVideo?`เวลา: <input type="number" min="0" max="600" data-f="dur" value="${sc.dur||0}"> วินาที`:""}
+          </div>
+        </div>
+      </div>`;
+    div.querySelectorAll("[data-f]").forEach(inp=>{
+      inp.oninput = ()=>{
+        sc[inp.dataset.f] = inp.dataset.f==="dur" ? (+inp.value||0) : inp.value;
+        save(); if(inp.dataset.f==="dur") renderDuration();
+      };
+      if(inp.tagName==="SELECT") inp.onchange = inp.oninput;
+    });
+    div.querySelectorAll("[data-a]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const a = btn.dataset.a;
+        if(a==="del"){ p.scenes.splice(i,1); }
+        if(a==="up" && i>0){ [p.scenes[i-1],p.scenes[i]]=[p.scenes[i],p.scenes[i-1]]; }
+        if(a==="down" && i<p.scenes.length-1){ [p.scenes[i+1],p.scenes[i]]=[p.scenes[i],p.scenes[i+1]]; }
+        save(); renderScenes();
+      };
+    });
+    sceneList.appendChild(div);
+  });
+  renderDuration();
+}
+function renderDuration(){
+  const p = currentProject();
+  const total = p.scenes.reduce((s,x)=>s+(+x.dur||0),0);
+  const badge = $("#durationBadge");
+  if(p.postType==="video"){
+    badge.style.display="";
+    badge.innerHTML = `รวมเวลา <b>${total}</b> วินาที ${total>60?"— ยาวกว่า 60 วิ ระวังคนดูหลุด":""}`;
+    badge.classList.toggle("over", total>60);
+  } else {
+    badge.style.display="";
+    badge.innerHTML = `ทั้งหมด <b>${p.scenes.length}</b> รูป ${p.scenes.length>10?"— เกิน 10 รูปแล้ว":""}`;
+    badge.classList.toggle("over", p.scenes.length>35);
+  }
+}
+$("#btnAddScene").onclick = ()=>{
+  currentProject().scenes.push({type:"เนื้อหา",visual:"",dialog:"",overlay:"",dur:currentProject().postType==="video"?5:0});
+  save(); renderScenes();
+};
+$("#btnTemplate").onclick = ()=>{
+  const p = currentProject();
+  if(p.scenes.length && !confirm("แทนที่ฉากที่มีอยู่ด้วยโครงสร้างแนะนำ?")) return;
+  p.scenes = JSON.parse(JSON.stringify(p.postType==="video"?VIDEO_TEMPLATE:PHOTO_TEMPLATE));
+  save(); renderScenes();
+};
+
+/* ================= CAPTION ================= */
+function renderHookStyles(){
+  const wrap = $("#hookStyles");
+  wrap.innerHTML = "";
+  Object.entries(HOOKS).forEach(([k,v])=>{
+    const c = document.createElement("div");
+    c.className = "chip"+(currentProject().hookStyle===k?" on":"");
+    c.textContent = v.label;
+    c.onclick = ()=>{ currentProject().hookStyle=k; save(); renderHookStyles(); };
+    wrap.appendChild(c);
+  });
+}
+$("#btnRandomHook").onclick = ()=>{
+  const p = currentProject();
+  const items = HOOKS[p.hookStyle].items;
+  let pick = items[Math.floor(Math.random()*items.length)];
+  pick = pick.replaceAll("{topic}", p.name && p.name!=="โปรเจกต์ใหม่" ? p.name : "สิ่งนี้");
+  $("#hookText").value = pick;
+  p.hook = pick; save(); renderPreview();
+};
+function renderCtaChips(){
+  const wrap = $("#ctaChips");
+  wrap.innerHTML = "";
+  CTAS.forEach(t=>{
+    const c = document.createElement("div");
+    c.className = "chip";
+    c.textContent = t;
+    c.onclick = ()=>{ $("#ctaText").value=t; currentProject().cta=t; save(); renderPreview(); };
+    wrap.appendChild(c);
+  });
+}
+function renderHashtags(){
+  const p = currentProject();
+  const wrap = $("#hashtagChips");
+  wrap.innerHTML = "";
+  const pool = [...BROAD_TAGS, ...(HASHTAGS[p.niche]||[])];
+  // include custom tags user added
+  p.tags.filter(t=>!pool.includes(t)).forEach(t=>pool.push(t));
+  pool.forEach(t=>{
+    const c = document.createElement("div");
+    c.className = "chip"+(p.tags.includes(t)?" on":"");
+    c.textContent = "#"+t;
+    c.onclick = ()=>{
+      const idx = p.tags.indexOf(t);
+      if(idx>=0) p.tags.splice(idx,1); else p.tags.push(t);
+      save(); renderHashtags(); renderPreview();
+    };
+    wrap.appendChild(c);
+  });
+}
+$("#customTag").onkeydown = e=>{
+  if(e.key!=="Enter") return;
+  const v = e.target.value.trim().replace(/^#/,"").replace(/\s+/g,"");
+  if(!v) return;
+  const p = currentProject();
+  if(!p.tags.includes(v)) p.tags.push(v);
+  e.target.value = ""; save(); renderHashtags(); renderPreview();
+};
+["hookText","bodyText","ctaText"].forEach(id=>{
+  $("#"+id).oninput = e=>{
+    const f = {hookText:"hook",bodyText:"body",ctaText:"cta"}[id];
+    currentProject()[f] = e.target.value; save(); renderPreview();
+  };
+});
+function buildCaption(){
+  const p = currentProject();
+  const parts = [p.hook, p.body, p.cta].map(s=>(s||"").trim()).filter(Boolean);
+  const tags = p.tags.map(t=>"#"+t).join(" ");
+  return parts.join("\n\n") + (tags ? "\n\n"+tags : "");
+}
+function renderPreview(){
+  const cap = buildCaption();
+  const html = cap
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/#([^\s#]+)/g,'<span class="tag">#$1</span>');
+  $("#capPreview").innerHTML = html || '<span style="color:var(--muted)">แคปชั่นจะแสดงที่นี่...</span>';
+  const n = cap.length;
+  const cc = $("#charCount");
+  cc.textContent = n + " ตัวอักษร" + (n>300 ? " (ส่วนเกิน 300 จะถูกซ่อนหลัง 'ดูเพิ่มเติม')" : "");
+  cc.classList.toggle("over", n>4000);
+}
+$("#btnCopy").onclick = async ()=>{
+  await navigator.clipboard.writeText(buildCaption());
+  toast("คัดลอกแคปชั่นแล้ว! 📋");
+};
+
+/* ================= EXPORT ================= */
+$("#btnExport").onclick = ()=>{
+  const p = currentProject();
+  const isVideo = p.postType==="video";
+  let out = `📌 ${p.name}\nประเภท: ${isVideo?"วีดีโอ":"รูปภาพ/สไลด์"}\n`;
+  out += "━".repeat(30)+"\n\n🎬 STORYBOARD\n\n";
+  if(!p.scenes.length) out += "(ยังไม่มีฉาก)\n";
+  p.scenes.forEach((sc,i)=>{
+    out += `【 ${isVideo?"ฉาก":"รูป"}ที่ ${i+1} — ${sc.type}${isVideo?` (${sc.dur||0} วิ)`:""} 】\n`;
+    if(sc.visual)  out += `  ${isVideo?"ภาพ":"รูป"}: ${sc.visual}\n`;
+    if(sc.dialog)  out += `  ${isVideo?"เสียง/บทพูด":"แคปชั่นบนรูป"}: ${sc.dialog}\n`;
+    if(sc.overlay) out += `  ข้อความบนจอ: ${sc.overlay}\n`;
+    out += "\n";
+  });
+  if(isVideo){
+    const total = p.scenes.reduce((s,x)=>s+(+x.dur||0),0);
+    out += `⏱ รวมเวลา: ${total} วินาที\n`;
+  }
+  out += "\n"+"━".repeat(30)+"\n\n✍️ แคปชั่น\n\n"+buildCaption()+"\n";
+  const blob = new Blob(["﻿"+out], {type:"text/plain;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (p.name||"tiktok-plan")+".txt";
+  a.click();
+  toast("ดาวน์โหลดไฟล์แล้ว! ⬇");
+};
+
+/* ================= MISC ================= */
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+function loadProjectUI(){
+  const p = currentProject();
+  $("#projectName").value = p.name==="โปรเจกต์ใหม่" ? "" : p.name;
+  $("#projectName").placeholder = "เช่น คลิปรีวิวคาเฟ่เปิดใหม่";
+  $("#niche").value = p.niche;
+  $("#hookText").value = p.hook||"";
+  $("#bodyText").value = p.body||"";
+  $("#ctaText").value = p.cta||"";
+  renderPostType(); renderScenes(); renderHookStyles(); renderCtaChips(); renderHashtags(); renderPreview();
+}
+
+renderProjectSelect();
+loadProjectUI();
+</script>
+</body>
+</html>
